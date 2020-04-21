@@ -1,0 +1,251 @@
+#Importation des librairies
+import pygame, sys
+from pygame.locals import*
+import pygame as pg
+import time
+import os
+import csv
+import random
+
+f = open('dataminer_phonetique.csv')
+
+fichierCSV = csv.reader(f)
+
+ListeX = []
+ListeY = []
+
+
+for ligne in fichierCSV:
+	x = ligne[1]
+	y = ligne[2]
+	ListeX.append(x)
+	ListeY.append(y)
+rangeof = len(ListeY)
+print(ListeY,rangeof)
+exoencours=1
+
+#initialisation ecran
+pg.init()
+fen=pg.display.set_mode((1200,800))
+pg.display.set_caption('DIL')
+#initialisation son
+pg.mixer.pre_init(16500, -16, 2, 2048) # setup mixer to avoid sound lag
+#update de l'ecran
+pg.display.update()
+
+#initialisation caracteristique
+score = 0
+main = 1
+#initialisation de la police
+font = pg.font.SysFont("comicsans",30,True)
+
+#Load le background
+
+#exo1 - Normal puis surbri.
+imex1 = pg.image.load("qcm.png").convert_alpha()
+imex11 = pg.image.load("qcm2.png").convert_alpha()
+#exo2 - Normal puis surbri.
+imex2 = pg.image.load("prononc.png").convert_alpha()
+imex22 = pg.image.load("prononc2.png").convert_alpha()
+#exo3 - Normal puis surbri.
+imex3 = pg.image.load("shad.png").convert_alpha()
+imex33 = pg.image.load("shad2.png").convert_alpha()
+#bouton retour menu
+home = pg.image.load("home.png").convert_alpha()
+
+#initialisation bouton SON 1-2-3 successivement, normal puis surbrillance
+b1nonsurbri = pg.image.load("1nonsurbri.png").convert_alpha() #buttonSound1 non surbri
+b2nonsurbri = pg.image.load("2nonsurbri.png").convert_alpha() #'''''''''''2'''''''''''
+b3nonsurbri = pg.image.load("3nonsurbri.png").convert_alpha() #'''''''''''3'''''''''''
+b1surbri = pg.image.load("1surbri.png").convert_alpha() #buttonSound1 en surbri
+b2surbri = pg.image.load("2surbri.png").convert_alpha() #'''''''''''2''''''''''
+b3surbri = pg.image.load("3surbri.png").convert_alpha() #'''''''''''3''''''''''
+
+#initialisation background
+bg = pg.image.load("bg.png").convert_alpha() #background
+
+#Initialisation des textes
+"""Position"""
+text = font.render('score:' + str(score), 1,(255,255,255)) #on peu print une question avec
+"""Page menu"""
+textintro = font.render('Page intro', 1,(255,255,255)) #pour savoir ou j'en suis
+"""Page exo2"""
+textex2 = font.render("Exercice 2 :", 1,(255,255,255)) #ex2
+
+
+#definition fonction pour avoir la position de la souris.
+def pos(liste):
+    textpos = ""
+    textpos += str(liste[0])
+    textpos += " "
+    textpos += str(liste[1])
+    return(textpos) #Je retourne la position X et Y en une seule chaine de caractere.
+
+#definition fonction qui sera implemente dans chaque fenetre car les choses dedans sont essentielles.
+
+def classic():
+    mouse = pygame.mouse.get_pos()
+    fen.blit(bg,(0,0)) #update du background
+    textpos = font.render(pos(mouse), 1,(255,255,255))
+    fen.blit(textpos, (1100,10)) #update de la position
+    return(mouse)
+#Mise en place du fond + update de l'ecran
+fen.blit(bg,(0,0))
+pg.display.update()
+
+##Jusqu'ici nous avons un fond bleu
+
+#Main boucle
+while main > 0:
+
+    #fenetre principale #1
+    while main == 1:
+        #Pour pouvoir quitter l'application
+        for event in pg.event.get():
+            if event.type==QUIT:
+                pg.quit()
+                sys.exit()
+        #on amene les chose classiques a afficher
+        mouse = classic()
+        #affichage de la page
+        fen.blit(textintro,(0,0))
+
+        #Si la souris est sur le bouton 1 afficher la surbri
+        #Si User clique, Amener vers exercice 1
+        #sinon afficher le bouton classique
+        if 0<mouse[0]<1200 and 175<mouse[1]<305:
+            fen.blit(imex11, (20,175)) #imageEXO1
+            if event.type==MOUSEBUTTONDOWN:
+                main=2 #EMENER VERS EXO1
+        else:
+            fen.blit(imex1, (20,175)) #imageEXO1
+
+        #Si la souris est sur le bouton 2 afficher la surbri
+        #Si User clique, Amener vers exercice 2
+        #sinon afficher le bouton classique
+        if 125<mouse[0]<1200 and 325<mouse[1]<475:
+            fen.blit(imex22, (20,325)) #imageEXO2
+            if event.type==MOUSEBUTTONDOWN:
+                main=3
+        else:
+            fen.blit(imex2, (20,325)) #imageEXO2
+
+        #Si la souris est sur le bouton 3 afficher la surbri
+        #Si User clique, Amener vers exercice 3
+        #sinon afficher le bouton classique
+        if 125<mouse[0]<1200 and 495<mouse[1]<645:
+            fen.blit(imex33, (20,495)) #imageEXO3
+            if event.type==MOUSEBUTTONDOWN:
+                main=4
+        else:
+            fen.blit(imex3, (20,495)) #imageEXO3
+
+        #toujours update l'ecran a la fin
+        pg.display.update()
+
+    #fenetre de l exercice 1
+    while main == 2:
+        #Pour pouvoir quitter l'application
+        for event in pg.event.get():
+            if event.type==QUIT:
+                pg.quit()
+                sys.exit()
+        #on amene les chose classiques a afficher
+        mouse = classic()
+        #affichage du bouton retour au menu principal
+        fen.blit(home, (575,10))
+        #pour retourner au lobby
+        if 575<mouse[0]<625 and 10<mouse[1]<60 and event.type==MOUSEBUTTONDOWN:
+            main = 1
+        #if exoencours == 1:
+            #xnombre = random.randint(0,len(LISTE),1)
+        #Tquestion = font.render(LISTE[x], 1,(255,255,255)) #Question
+        #fen.blit(Tquestion, 1, (255,255,255))
+        #for i in range(len(LISTE[xnombre+1]):
+            #WSI = pygame.mixer.music.load(LISTE[xnombre+1][i])
+            #pygame.mixer.music.play(loops=1)
+        pg.display.update()
+
+    #Fenetre pour l'exercice 2
+    while main == 3: #exo 3 sounds
+        #Pour pouvoir quitter l'application
+        for event in pg.event.get():
+            if event.type==QUIT:
+                pg.quit()
+                sys.exit()
+        #Classique import
+        mouse = classic()
+        #afficher sur quelle page nous sommes
+        fen.blit(textex2,(0,0))
+        #afficher le bouton retour au menu
+        fen.blit(home, (575,10))
+        if 575<mouse[0]<625 and 10<mouse[1]<60 and event.type==MOUSEBUTTONDOWN:
+            main = 1
+
+        if exoencours == 1:
+            xnombre = random.randrange(0,208,1)
+            print(xnombre)
+            Tquestion = font.render(ListeY[xnombre], 1,(255,255,255)) #Question
+            print(ListeY[xnombre])
+            a = ListeY[xnombre])
+            #for i in range(a):
+              #print(a[i])
+            #ListeChoix = [a,b,c]
+            exoencours =0
+        fen.blit(Tquestion, (50,50))
+        pg.display.update()
+        
+        #bouton numero 1 avec son qui se lance et surbri
+        if 125<mouse[0]<375 and 450<mouse[1]<700:
+            fen.blit(b1surbri, (125,450))
+            if event.type==MOUSEBUTTONDOWN:
+
+                pass
+        else:
+            fen.blit(b1nonsurbri, (125,450))
+
+        #bouton numero 2 avec son qui se lance et surbri
+        if 475<mouse[0]<725 and 450<mouse[1]<700:
+            fen.blit(b2surbri, (475,450))
+            #WSI = pygame.mixer.music.load(liste[XQUESTION2][1])
+            #pygame.mixer.music.play(loops=1)
+        else:
+            fen.blit(b2nonsurbri, (475,450))
+
+        #bouton numero 3 avec son qui se lance et surbri
+        if 825<mouse[0]<1075 and 450<mouse[1]<700:
+            fen.blit(b3surbri, (825,450))
+            #WSI = pygame.mixer.music.load(liste[XQUESTION2][2])
+            #pygame.mixer.music.play(loops=1)
+        else:
+            fen.blit(b3nonsurbri, (825,450))
+
+        pg.display.update()
+
+    #fenetre pour l'exercice 3
+    while main == 4 :
+            #pour pouvoir quitter la fenetre
+            for event in pg.event.get():
+                if event.type==QUIT:
+                    pg.quit()
+                    sys.exit()
+            #importer les informations classiques
+            mouse = classic()
+            #importer le bouton retour au menu
+            fen.blit(home, (575,10))
+            if 575<mouse[0]<625 and 10<mouse[1]<60 and event.type==MOUSEBUTTONDOWN:
+                main  = 1
+
+            #imaginons nous avons dans une liste une liste de mot + liste son
+             #xnombre = random.randint(0,len(LISTE2),2)
+             #Tquestion = font.render(LISTE2[x], 1,(255,255,255)) #Question
+             #fen.blit(Tquestion, 1, (255,255,255))
+             #for i in range(len(LISTE2[xnombre+1]):
+                #WSI = pygame.mixer.music.load(LISTE2[xnombre+1][i])
+                #pygame.mixer.music.play(loops=1)
+
+            pg.display.update()
+
+#en dehors de la boucle
+pg.quit()
+sys.exit()
